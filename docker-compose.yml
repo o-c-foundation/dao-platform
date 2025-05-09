@@ -1,0 +1,47 @@
+version: '3.9'
+services:
+  backend:
+    build: ./backend
+    restart: always
+    env_file: .env
+    ports:
+      - "3001:3001"
+    depends_on:
+      - db
+
+  frontend:
+    build: ./frontend
+    restart: always
+    env_file: .env
+    ports:
+      - "3000:3000"
+
+  websocket:
+    build: ./websocket-server
+    restart: always
+    ports:
+      - "4000:4000"
+
+  nginx:
+    image: nginx:stable
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - frontend
+      - backend
+
+  db:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_USER: ocfdao
+      POSTGRES_PASSWORD: strongpassword
+      POSTGRES_DB: dao
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata: 
